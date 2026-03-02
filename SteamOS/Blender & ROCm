@@ -1,0 +1,60 @@
+==============================
+IF DISTROBOX IS NOT INSTALLED:
+
+mkdir ~/.local/distrobox/
+
+curl -s https://raw.githubusercontent.com/89luca89/distrobox/main/install | sh -s -- --prefix ~/.local/distrobox/
+
+sudo touch /etc/subuid /etc/subgid
+sudo usermod --add-subuid 100000-165535 --add-subgid 100000-165535 $USER
+
+wget https://github.com/89luca89/podman-launcher/releases/download/v0.0.5/podman-launcher-amd64 -O $HOME/.local/bin
+
+export PATH=$HOME/.local/distrobox/bin:$PATH
+export PATH=$HOME/.local/distrobox/podman/bin:$PATH
+xhost +si:localuser:$USER
+
+===========================================
+NORMALLY, ON STEAMOS, IS DEFAULT INSTALLED!
+
+distrobox create --name ubuntu2404 -i ubuntu:24.04
+distrobox enter ubuntu2404
+
+sudo apt update
+sudo apt install build-essential
+sudo apt install libnuma-dev wget gnupg2
+
+sudo usermod -a -G video $LOGNAME
+
+echo 'ADD_EXTRA_GROUPS=1' | sudo tee -a /etc/adduser.conf
+echo 'EXTRA_GROUPS=video' | sudo tee -a /etc/adduser.conf
+echo 'EXTRA_GROUPS=render' | sudo tee -a /etc/adduser.conf
+
+wget https://repo.radeon.com/amdgpu-install/latest/ubuntu/noble/... open browser and get the link!
+
+sudo apt install ./amdgpu-install TAB
+IGNORE ERRORS!
+sudo apt update
+
+sudo amdgpu-install --usecase=rocm,hip --no-dkms
+
+export PATH=$PATH:/opt/rocm/bin:/opt/rocm/rocprofiler/bin:/opt/rocm/opencl/bin
+
+exit
+podman stop ubuntu2404
+distrobox enter ubuntu2404
+
+rocminfo
+
+sudo apt install rocm-libs hipcub miopen-hip rccl
+
+USE blender-5.0.1-linux-x64.tar.xz
+tar xf blender-5.0.1-linux-x64.tar.xz
+cd blender-5.0.1-linux-x64/
+./blender
+
+REMOVE:
+podman stop ubuntu2404
+distrobox rm ubuntu2404
+
+SOURCE: https://www.reddit.com/r/SteamDeck/comments/102i27w/guide_how_to_install_rocm_for_gpu_julia/?tl=pt-br
