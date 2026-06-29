@@ -3,6 +3,11 @@ Precisa reiniciar o sistema.
 
 sudo apt install gamescope mangoapp mangohud -y
 
+sudo nano /usr/bin/steamos-session-select
+#!/bin/bash
+steam -shutdown
+sudo chmod +x /usr/bin/steamos-session-select
+
 sudo bash -c 'cat > /usr/share/wayland-sessions/steam-gamescope.desktop << EOF
 [Desktop Entry]
 Name=Steam Game Mode
@@ -14,41 +19,164 @@ EOF'
 
 sudo nano /usr/local/bin/steam-sddm-watcher.sh
 #!/bin/bash
+# =============================================================================
+# steam-sddm-watcher.sh
+# Lança o gamescope + Steam em modo Big Picture e monitora o clique em
+# "Exit to Desktop" (ou crash do gamescope), encerrando tudo de forma limpa
+# e devolvendo a sessão ao SDDM/Plasma sem precisar reiniciar a máquina.
+# =============================================================================
 
+set -uo pipefail
+
+# -----------------------------------------------------------------------------
+# Variáveis de ambiente da sessão gamescope
+# -----------------------------------------------------------------------------
 export XDG_CURRENT_DESKTOP=Gamescope
 export SDL_VIDEODRIVER=wayland
 
-# 1. Rodar o Gamescope com o Steam em background
-env STEAM_MULTIPLE_XWAYLANDS=1 gamescope -W 1280 -H 800 -r 60 -f -e --xwayland-count 2 -- steam -gamepadui -steamdeck -steamos3 &
+# Faz o Steam chamar este próprio script quando o usuário clicar em
+# "Exit to Desktop" no menu de energia do Big Picture, em vez de depender
+# só do polling via pgrep.
+export STEAM_DESKTOP_RETURN_COMMAND="/usr/local/bin/steamos-leave-nested"
+
+LOG="/tmp/steam-sddm-watcher.log"
+echo "[$(date)] Iniciando sessão gamescope" > "$LOG"
+
+# -----------------------------------------------------------------------------
+# 1. Sobe o gamescope com o Steam dentro
+# -----------------------------------------------------------------------------
+env STEAM_MULTIPLE_XWAYLANDS=1 gamescope \
+    -W 1280 -H 800 -r 60 -f -e --xwayland-count 2 \
+    -- steam -gamepadui -steamdeck -steamos3 >> "$LOG" 2>&1 &
 GAMESCOPE_PID=$!
 
-# 2. Criar uma função de monitoramento em loop
-# Ela fica checando se o processo principal do "steamfrontend" sumiu ou fechou
+# -----------------------------------------------------------------------------
+# 2. Loop de monitoramento
+#    Sai do loop se o gamescope morrer sozinho (crash) ou se o processo de
+#    UI do Steam ("steam -gamepadui") desaparecer (sinal de "Exit to Desktop").
+# -----------------------------------------------------------------------------
 while true; do
     sleep 2
-    
-    # Se o gamescope morreu por fora (ex: crash), sai do loop
-    if ! kill -0 $GAMESCOPE_PID 2>/dev/null; then
+
+    if ! kill -0 "$GAMESCOPE_PID" 2>/dev/null; then
+        echo "[$(date)] gamescope encerrou por conta própria" >> "$LOG"
         break
     fi
 
-    # O truque mágico: Quando você clica em "Switch to Desktop", o cliente principal da Steam 
-    # fecha seus subprocessos de UI antes de tentar alternar. Se o 'steam' (UI) sumir da lista de processos,
-    # significa que o botão foi pressionado!
     if ! pgrep -f "steam -gamepadui" > /dev/null; then
-        echo "Botão 'Switch to Desktop' detectado!"
+        echo "[$(date)] Botão 'Exit to Desktop' detectado" >> "$LOG"
         break
     fi
 done
 
-# 3. Passa o rodo geral para liberar a GPU instantaneamente
-killall -9 gamescope steam steamwebhelper xwayland 2>/dev/null
-sleep 1
+# -----------------------------------------------------------------------------
+# 3. Encerramento limpo (NUNCA usar -9 de primeira)
+#    SIGTERM dá tempo do gamescope liberar o DRM master da GPU.
+#    Matar com -9 direto deixa a GPU "presa", que é a causa mais comum
+#    do travamento que só sai reiniciando o sistema.
+# -----------------------------------------------------------------------------
+echo "[$(date)] Enviando SIGTERM para o gamescope (PID $GAMESCOPE_PID)" >> "$LOG"
+kill -TERM "$GAMESCOPE_PID" 2>/dev/null
 
-# 4. Força o SDDM a reiniciar e puxar o Plasma (com o seu autologin configurado)
-sudo systemctl restart sddm
+for i in $(seq 1 10); do
+    kill -0 "$GAMESCOPE_PID" 2>/dev/null || break
+    sleep 0.5
+done
 
+# Só força com -9 se depois de ~5s ainda estiver vivo
+if kill -0 "$GAMESCOPE_PID" 2>/dev/null; then
+    echo "[$(date)] gamescope não respondeu a SIGTERM, forçando -9" >> "$LOG"
+    kill -9 "$GAMESCOPE_PID" 2>/dev/null
+fi
+
+pkill -TERM steamwebhelper 2>/dev/null
+pkill -TERM steam 2>/dev/null
+pkill -TERM xwayland 2>/dev/null
+sleep 2
+pkill -9 steamwebhelper steam xwayland 2>/dev/null
+
+# -----------------------------------------------------------------------------
+# 4. Devolve a sessão ao logind/SDDM corretamente
+#    Em vez de reiniciar o serviço SDDM (que não necessariamente realoca
+#    a sessão antiga), encerramos a sessão atual via loginctl, deixando
+#    o logind chamar o SDDM/Plasma de volta sem disputa de GPU.
+# -----------------------------------------------------------------------------
+SESSION_ID=$(loginctl --no-legend list-sessions | awk -v u="$USER" '$3==u {print $1; exit}')
+
+if [ -n "$SESSION_ID" ]; then
+    echo "[$(date)] Encerrando sessão $SESSION_ID via loginctl" >> "$LOG"
+    loginctl terminate-session "$SESSION_ID"
+else
+    echo "[$(date)] Sessão não encontrada via loginctl, fallback para restart do sddm" >> "$LOG"
+    sudo systemctl restart sddm
+fi
+
+echo "[$(date)] Finalizado" >> "$LOG"
 sudo chmod +x /usr/local/bin/steam-sddm-watcher.sh
+
+sudo nano /usr/bin/steamos-leave-nested.sh
+#!/bin/bash
+# =============================================================================
+# steamos-leave-nested.sh
+# Chamado pelo steamos-session-select quando o usuário clica em
+# "Exit to Desktop". Mata o gamescope de forma limpa ANTES de devolver a
+# sessão, senão a GPU fica presa e trava o sistema.
+# =============================================================================
+
+set -uo pipefail
+
+LOGDIR="/var/log/gamescope-session"
+mkdir -p "$LOGDIR" 2>/dev/null
+LOG="$LOGDIR/steamos-leave-nested.log"
+echo "[$(date)] steamos-leave-nested acionado" >> "$LOG" 2>/dev/null || LOG="/dev/null"
+
+# -----------------------------------------------------------------------------
+# 1. Localiza o PID do gamescope (é ele quem detém o DRM master da GPU)
+# -----------------------------------------------------------------------------
+GAMESCOPE_PID=$(pgrep -x gamescope | head -n1)
+
+if [ -n "$GAMESCOPE_PID" ]; then
+    echo "[$(date)] Encontrado gamescope PID $GAMESCOPE_PID, enviando SIGTERM" >> "$LOG"
+    kill -TERM "$GAMESCOPE_PID" 2>/dev/null
+
+    for i in $(seq 1 10); do
+        kill -0 "$GAMESCOPE_PID" 2>/dev/null || break
+        sleep 0.5
+    done
+
+    if kill -0 "$GAMESCOPE_PID" 2>/dev/null; then
+        echo "[$(date)] gamescope não respondeu, forçando -9" >> "$LOG"
+        kill -9 "$GAMESCOPE_PID" 2>/dev/null
+    fi
+else
+    echo "[$(date)] Nenhum processo gamescope encontrado" >> "$LOG"
+fi
+
+# -----------------------------------------------------------------------------
+# 2. Limpa o resto da árvore de processos do Steam/Xwayland
+# -----------------------------------------------------------------------------
+pkill -TERM steamwebhelper 2>/dev/null
+pkill -TERM steam 2>/dev/null
+pkill -TERM xwayland 2>/dev/null
+sleep 2
+pkill -9 steamwebhelper steam xwayland 2>/dev/null
+
+# -----------------------------------------------------------------------------
+# 3. Devolve o seat ao logind de forma limpa (preferível a restart do sddm)
+# -----------------------------------------------------------------------------
+SESSION_ID=$(loginctl --no-legend list-sessions | awk -v u="$USER" '$3==u {print $1; exit}')
+
+if [ -n "$SESSION_ID" ]; then
+    echo "[$(date)] Encerrando sessão $SESSION_ID via loginctl" >> "$LOG"
+    loginctl terminate-session "$SESSION_ID"
+else
+    echo "[$(date)] Sessão não encontrada, fallback para restart do sddm" >> "$LOG"
+    sudo systemctl restart sddm
+fi
+
+echo "[$(date)] Finalizado" >> "$LOG"
+
+sudo chmod +x /usr/bin/steamos-leave-nested.sh
 
 echo "kernel.unprivileged_userns_clone=1" | sudo tee /etc/sysctl.d/99-steam-sandbox.conf
 
