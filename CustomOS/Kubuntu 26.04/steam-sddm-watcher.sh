@@ -40,12 +40,12 @@ sleep 2
 pkill -9 steamwebhelper steam xwayland 2>/dev/null
 
 # -----------------------------------------------------------------------------
-# 4. Devolve a sessão ao logind/SDDM corretamente
+# 4. Devolve a sessão de forma amigável sem dar "crash" no SDDM
 # -----------------------------------------------------------------------------
-sleep 1
-SESSION_ID=$(loginctl --no-legend list-sessions | awk -v u="$USER" '$3==u {print $1; exit}')
-if [ -n "$SESSION_ID" ]; then
-    loginctl terminate-session "$SESSION_ID"
-else
-    sudo systemctl restart sddm
-fi
+echo "[$(date)] Sessão encerrada de forma limpa. Saindo." >> "$LOG"
+
+# Em vez de passar o trator com o loginctl, apenas encerra o script atual.
+# Como este script é o "pai" da sessão xsession/wayland do SDDM,
+# quando ele termina com sucesso (exit 0), o SDDM entende que a sessão acabou 
+# pacificamente por vontade do usuário, lê o arquivo 20-kubuntu.conf e faz o autologin.
+exit 0
