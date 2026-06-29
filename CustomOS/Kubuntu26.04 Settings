@@ -1,0 +1,24 @@
+sudo apt install gamescope mangoapp mangohud -y
+
+sudo bash -c 'cat > /usr/share/wayland-sessions/steam-gamescope.desktop << EOF
+[Desktop Entry]
+Name=Steam Game Mode
+Comment=Start Steam in Steam Deck Hardware Session
+Exec=env STEAM_MULTIPLE_XWAYLANDS=1 gamescope -W 1280 -H 800 -r 90 -f -e --xwayland-count 2 -- steam -gamepadui -steamdeck
+Type=Application
+DesktopNames=Gamescope
+EOF'
+
+sudo sysctl -w kernel.unprivileged_userns_clone=1
+
+echo "kernel.unprivileged_userns_clone=1" | sudo tee /etc/sysctl.d/99-steam-sandbox.conf
+
+mkdir -p ~/.config/xdg-desktop-portal
+nano ~/.config/xdg-desktop-portal/gamescope-portals.conf
+
+[Preferred]
+default=kde;gtk;
+org.freedesktop.impl.portal.Settings=kde
+
+rm -rf ~/.steam/debian-installation/steamapps/common/SteamLinuxRuntime_sniper/var/
+rm -rf ~/.steam/debian-installation/steamapps/common/SteamLinuxRuntime_soldier/var/
