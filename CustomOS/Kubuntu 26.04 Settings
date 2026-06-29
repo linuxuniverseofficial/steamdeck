@@ -24,7 +24,6 @@ rm -rf ~/.steam/debian-installation/steamapps/common/SteamLinuxRuntime_sniper/va
 rm -rf ~/.steam/debian-installation/steamapps/common/SteamLinuxRuntime_soldier/var/
 
 sudo nano /etc/sddm.conf.d/kde_settings.conf
-sudo nano /etc/sddm.conf
 
 [General]
 HaltCommand=/usr/sbin/shutdown -h now
