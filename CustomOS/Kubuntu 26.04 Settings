@@ -22,3 +22,24 @@ org.freedesktop.impl.portal.Settings=kde
 
 rm -rf ~/.steam/debian-installation/steamapps/common/SteamLinuxRuntime_sniper/var/
 rm -rf ~/.steam/debian-installation/steamapps/common/SteamLinuxRuntime_soldier/var/
+
+sudo nano /etc/sddm.conf.d/kde_settings.conf
+sudo nano /etc/sddm.conf
+
+[General]
+HaltCommand=/usr/sbin/shutdown -h now
+RebootCommand=/usr/sbin/reboot
+
+[Users]
+MaximumUid=60000
+MinimumUid=1000
+
+[Autologin]
+Relogin=false
+ReuseSession=false
+
+sudo nano /usr/local/bin/steamos-leave-nested
+#!/bin/bash
+# Força o fechamento do gamescope e reinicia o gerenciador de login
+sudo systemctl restart sddm
+sudo chmod +x /usr/local/bin/steamos-leave-nested
