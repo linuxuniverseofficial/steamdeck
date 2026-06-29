@@ -1,7 +1,11 @@
 
 sudo apt install gamescope mangoapp mangohud -y
 
-curl -sSL https://raw.githubusercontent.com/linuxuniverseofficial/steamdeck/refs/heads/main/CustomOS/Kubuntu%2026.04/steamos-desktop-select | sudo tee /usr/bin/steamos-session-select; sudo chmod +x /usr/bin/steamos-desktop-select
+curl -sSL https://raw.githubusercontent.com/linuxuniverseofficial/steamdeck/refs/heads/main/CustomOS/Kubuntu%2026.04/steamos-session-select | sudo tee /usr/bin/steamos-session-select; sudo chmod +x /usr/bin/steamos-session-select
+
+curl -sSL https://raw.githubusercontent.com/linuxuniverseofficial/steamdeck/refs/heads/main/CustomOS/Kubuntu%2026.04/steamos-desktop-select | sudo tee /usr/bin/steamos-desktop-select; sudo chmod +x /usr/bin/steamos-desktop-select
+
+curl -sSL https://raw.githubusercontent.com/linuxuniverseofficial/steamdeck/refs/heads/main/CustomOS/Kubuntu%2026.04/steam-sddm-watcher.sh | sudo tee /usr/local/bin/steam-sddm-watcher.sh; sudo chmod +x /usr/local/bin/steam-sddm-watcher.sh
 
 sudo bash -c 'cat > /usr/share/wayland-sessions/steam-gamescope.desktop << EOF
 [Desktop Entry]
@@ -11,8 +15,6 @@ Exec=/usr/local/bin/steam-sddm-watcher.sh
 Type=Application
 DesktopNames=Gamescope
 EOF'
-
-curl -sSL https://raw.githubusercontent.com/linuxuniverseofficial/steamdeck/refs/heads/main/CustomOS/Kubuntu%2026.04/steam-sddm-watcher.sh | sudo tee /usr/local/bin/steam-sddm-watcher.sh; sudo chmod +x /usr/local/bin/steam-sddm-watcher.sh
 
 echo "kernel.unprivileged_userns_clone=1" | sudo tee /etc/sysctl.d/99-steam-sandbox.conf
 
