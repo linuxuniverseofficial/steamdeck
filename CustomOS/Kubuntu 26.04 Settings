@@ -4,12 +4,28 @@ sudo bash -c 'cat > /usr/share/wayland-sessions/steam-gamescope.desktop << EOF
 [Desktop Entry]
 Name=Steam Game Mode
 Comment=Start Steam in Steam Deck Hardware Session
-Exec=gamescope --mangoapp -W 1280 -H 800 -r 90 -f -e --xwayland-count 2 -- steam -gamepadui -steamdeck -steamos3
+Exec=/usr/local/bin/steam-sddm-watcher.sh
 Type=Application
 DesktopNames=Gamescope
 EOF'
 
-sudo sysctl -w kernel.unprivileged_userns_clone=1
+sudo nano /usr/local/bin/steam-sddm-watcher.sh
+#!/bin/bash
+# Lança o Gamescope e o Steam com as flags corretas que você validou
+env STEAM_MULTIPLE_XWAYLANDS=1 gamescope -W 1280 -H 800 -r 60 -f -e --xwayland-count 2 -- steam -gamepadui -steamdeck -steamos3 &
+STEAM_PID=$!
+
+# Fica em loop checando se o processo do Steam foi finalizado ou se o comando de saída foi dado
+while kill -0 $STEAM_PID 2>/dev/null; do
+    sleep 2
+done
+
+# Quando o Steam fechar (porque você clicou em Switch to Desktop)
+# Nós forçamos o encerramento do Gamescope e reiniciamos o SDDM de forma limpa
+killall gamescope
+sudo systemctl restart sddm
+
+sudo chmod +x /usr/local/bin/steam-sddm-watcher.sh
 
 echo "kernel.unprivileged_userns_clone=1" | sudo tee /etc/sysctl.d/99-steam-sandbox.conf
 
