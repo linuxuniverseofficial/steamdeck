@@ -1,3 +1,6 @@
+FUNCIONA mas BACK TO DESKTOP nao funciona.
+Precisa reiniciar o sistema.
+
 sudo apt install gamescope mangoapp mangohud -y
 
 sudo bash -c 'cat > /usr/share/wayland-sessions/steam-gamescope.desktop << EOF
