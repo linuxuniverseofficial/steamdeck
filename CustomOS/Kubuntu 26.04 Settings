@@ -4,7 +4,7 @@ sudo bash -c 'cat > /usr/share/wayland-sessions/steam-gamescope.desktop << EOF
 [Desktop Entry]
 Name=Steam Game Mode
 Comment=Start Steam in Steam Deck Hardware Session
-Exec=env STEAM_MULTIPLE_XWAYLANDS=1 gamescope -W 1280 -H 800 -r 90 -f -e --xwayland-count 2 -- steam -gamepadui -steamdeck
+Exec=gamescope --mangoapp -W 1280 -H 800 -r 90 -f -e --xwayland-count 2 -- steam -gamepadui -steamdeck
 Type=Application
 DesktopNames=Gamescope
 EOF'
@@ -48,3 +48,16 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 
 sudo nano /etc/default/grub
 mitigations=off
+
+sudo usermod -a -G video,render,input,disk $USER
+
+mkdir -p ~/.config/mangoapp
+mkdir -p ~/.config/MangoHud
+
+# Cria um link simbólico para enganar o Steam, fazendo ele achar que está no SteamOS
+sudo ln -sf /usr/bin/mangoapp /usr/bin/srv/mangoapp 2>/dev/null || true
+
+nano ~/.config/MangoHud/MangoHud.conf
+control=mangoapp
+fsr_steam_sharpness=5
+nis_steam_sharpness=5
