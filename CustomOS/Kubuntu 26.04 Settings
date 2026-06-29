@@ -4,7 +4,7 @@ sudo bash -c 'cat > /usr/share/wayland-sessions/steam-gamescope.desktop << EOF
 [Desktop Entry]
 Name=Steam Game Mode
 Comment=Start Steam in Steam Deck Hardware Session
-Exec=gamescope --mangoapp -W 1280 -H 800 -r 90 -f -e --xwayland-count 2 -- steam -gamepadui -steamdeck
+Exec=gamescope --mangoapp -W 1280 -H 800 -r 90 -f -e --xwayland-count 2 -- steam -gamepadui -steamdeck -steamos3
 Type=Application
 DesktopNames=Gamescope
 EOF'
