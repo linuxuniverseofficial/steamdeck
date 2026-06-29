@@ -11,18 +11,21 @@ EOF'
 
 sudo nano /usr/local/bin/steam-sddm-watcher.sh
 #!/bin/bash
-# Lança o Gamescope e o Steam com as flags corretas que você validou
+# Lança o Gamescope e o Steam
 env STEAM_MULTIPLE_XWAYLANDS=1 gamescope -W 1280 -H 800 -r 60 -f -e --xwayland-count 2 -- steam -gamepadui -steamdeck -steamos3 &
 STEAM_PID=$!
 
-# Fica em loop checando se o processo do Steam foi finalizado ou se o comando de saída foi dado
+# Fica vigiando o Steam
 while kill -0 $STEAM_PID 2>/dev/null; do
     sleep 2
-done
+</done>
 
-# Quando o Steam fechar (porque você clicou em Switch to Desktop)
-# Nós forçamos o encerramento do Gamescope e reiniciamos o SDDM de forma limpa
-killall gamescope
+# O Steam fechou! 
+# 1. Passa o rodo no gamescope e xwayland para liberar a GPU
+killall -9 gamescope steam xwayland 2>/dev/null
+sleep 1
+
+# 2. Reinicia o SDDM (agora sem pedir senha graças ao visudo)
 sudo systemctl restart sddm
 
 sudo chmod +x /usr/local/bin/steam-sddm-watcher.sh
@@ -77,3 +80,6 @@ nano ~/.config/MangoHud/MangoHud.conf
 control=mangoapp
 fsr_steam_sharpness=5
 nis_steam_sharpness=5
+
+sudo VISUAL=nano visudo
+ztge ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart sddm
