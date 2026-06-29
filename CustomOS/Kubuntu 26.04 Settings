@@ -42,3 +42,9 @@ sudo nano /usr/local/bin/steamos-leave-nested
 # Força o fechamento do gamescope e reinicia o gerenciador de login
 sudo systemctl restart sddm
 sudo chmod +x /usr/local/bin/steamos-leave-nested
+
+echo 'KERNEL=="cpu_dma_latency", PROTECTION="0666"' | sudo tee /etc/udev/rules.d/99-steamdeck-perf.rules
+sudo udevadm control --reload-rules && sudo udevadm trigger
+
+sudo nano /etc/default/grub
+mitigations=off
