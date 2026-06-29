@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Envia o encerramento real para a SteamUI acordar e fechar
+steam -shutdown
