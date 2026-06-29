@@ -7,6 +7,8 @@ curl -sSL https://raw.githubusercontent.com/linuxuniverseofficial/steamdeck/refs
 
 curl -sSL https://raw.githubusercontent.com/linuxuniverseofficial/steamdeck/refs/heads/main/CustomOS/Kubuntu%2026.04/steam-sddm-watcher.sh | sudo tee /usr/local/bin/steam-sddm-watcher.sh; sudo chmod +x /usr/local/bin/steam-sddm-watcher.sh
 
+curl -sSL https://raw.githubusercontent.com/linuxuniverseofficial/steamdeck/refs/heads/main/CustomOS/Kubuntu%2026.04/GameMode.sh | sudo tee /home/ztge/GameMode.sh; sudo chmod +x /home/ztge/GameMode.sh
+
 sudo bash -c 'cat > /usr/share/wayland-sessions/steam-gamescope.desktop << EOF
 [Desktop Entry]
 Name=Steam Game Mode
