@@ -11,21 +11,38 @@ EOF'
 
 sudo nano /usr/local/bin/steam-sddm-watcher.sh
 #!/bin/bash
-# Lança o Gamescope e o Steam
+
+export XDG_CURRENT_DESKTOP=Gamescope
+export SDL_VIDEODRIVER=wayland
+
+# 1. Rodar o Gamescope com o Steam em background
 env STEAM_MULTIPLE_XWAYLANDS=1 gamescope -W 1280 -H 800 -r 60 -f -e --xwayland-count 2 -- steam -gamepadui -steamdeck -steamos3 &
-STEAM_PID=$!
+GAMESCOPE_PID=$!
 
-# Fica vigiando o Steam
-while kill -0 $STEAM_PID 2>/dev/null; do
+# 2. Criar uma função de monitoramento em loop
+# Ela fica checando se o processo principal do "steamfrontend" sumiu ou fechou
+while true; do
     sleep 2
-</done>
+    
+    # Se o gamescope morreu por fora (ex: crash), sai do loop
+    if ! kill -0 $GAMESCOPE_PID 2>/dev/null; then
+        break
+    fi
 
-# O Steam fechou! 
-# 1. Passa o rodo no gamescope e xwayland para liberar a GPU
-killall -9 gamescope steam xwayland 2>/dev/null
+    # O truque mágico: Quando você clica em "Switch to Desktop", o cliente principal da Steam 
+    # fecha seus subprocessos de UI antes de tentar alternar. Se o 'steam' (UI) sumir da lista de processos,
+    # significa que o botão foi pressionado!
+    if ! pgrep -f "steam -gamepadui" > /dev/null; then
+        echo "Botão 'Switch to Desktop' detectado!"
+        break
+    fi
+done
+
+# 3. Passa o rodo geral para liberar a GPU instantaneamente
+killall -9 gamescope steam steamwebhelper xwayland 2>/dev/null
 sleep 1
 
-# 2. Reinicia o SDDM (agora sem pedir senha graças ao visudo)
+# 4. Força o SDDM a reiniciar e puxar o Plasma (com o seu autologin configurado)
 sudo systemctl restart sddm
 
 sudo chmod +x /usr/local/bin/steam-sddm-watcher.sh
