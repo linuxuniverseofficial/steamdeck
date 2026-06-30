@@ -28,18 +28,25 @@ org.freedesktop.impl.portal.Settings=kde
 rm -rf ~/.steam/debian-installation/steamapps/common/SteamLinuxRuntime_sniper/var/
 rm -rf ~/.steam/debian-installation/steamapps/common/SteamLinuxRuntime_soldier/var/
 
-sudo nano /etc/sddm.conf.d/kde_settings.conf
+sudo nano /etc/sddm.conf.d/20-kubuntu.conf
+[Autologin]
+Relogin=true
+Session=plasma
+User=ztge
+
 [General]
-HaltCommand=/usr/sbin/shutdown -h now
-RebootCommand=/usr/sbin/reboot
+HaltCommand=
+RebootCommand=
+
+[Theme]
+Current=kubuntu
+CursorSize=30
+CursorTheme=breeze_cursors
+Font=Noto Sans,10,-1,0,400,0,0,0,0,0,0,0,0,0,0,1
 
 [Users]
 MaximumUid=60000
 MinimumUid=1000
-
-[Autologin]
-Relogin=false
-ReuseSession=false
 
 echo 'KERNEL=="cpu_dma_latency", PROTECTION="0666"' | sudo tee /etc/udev/rules.d/99-steamdeck-perf.rules
 sudo udevadm control --reload-rules && sudo udevadm trigger
@@ -57,6 +64,11 @@ nano ~/.config/MangoHud/MangoHud.conf
 control=mangoapp
 fsr_steam_sharpness=5
 nis_steam_sharpness=5
+
+sudo setcap 'CAP_SYS_NICE=eip' $(which gamescope)
+sudo setcap 'CAP_SYS_NICE=eip' $(which mangoapp)
+
+sudo ln -sf /usr/bin/mangoapp /usr/bin/srv/mangoapp 2>/dev/null || true
 
 sudo VISUAL=nano visudo
 ztge ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart sddm
