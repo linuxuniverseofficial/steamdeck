@@ -76,3 +76,9 @@ ztge ALL=(ALL) NOPASSWD: /usr/bin/steamos-session-select
 ztge ALL=(ALL) NOPASSWD: /usr/bin/steamos-desktop-select
 ztge ALL=(ALL) NOPASSWD: /etc/sddm.conf.d/kde_settings.conf
 ztge ALL=(ALL) NOPASSWD: /etc/sddm.conf.d/20-kubuntu.conf
+
+sudo tee /etc/udev/rules.d/90-backlight.rules << 'EOF'
+SUBSYSTEM=="backlight", KERNEL=="amdgpu_bl1", ACTION=="add", RUN+="/bin/chgrp video /sys/class/backlight/%k/brightness", RUN+="/bin/chmod g+w /sys/class/backlight/%k/brightness"
+EOF
+
+sudo udevadm control --reload-rules; sudo udevadm trigger --subsystem-match=backlight
