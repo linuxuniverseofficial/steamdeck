@@ -72,3 +72,7 @@ sudo ln -sf /usr/bin/mangoapp /usr/bin/srv/mangoapp 2>/dev/null || true
 
 sudo VISUAL=nano visudo
 ztge ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart sddm
+ztge ALL=(ALL) NOPASSWD: /usr/bin/steamos-session-select
+ztge ALL=(ALL) NOPASSWD: /usr/bin/steamos-desktop-select
+ztge ALL=(ALL) NOPASSWD: /etc/sddm.conf.d/kde_settings.conf
+ztge ALL=(ALL) NOPASSWD: /etc/sddm.conf.d/20-kubuntu.conf
