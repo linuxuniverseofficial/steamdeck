@@ -1,22 +1,21 @@
 #!/bin/bash
-# 1. Configura o arquivo oficial do Kubuntu para ir pro modo jogo
-sed -i 's/Session=.*/Session=steam-gamescope/' /etc/sddm.conf.d/20-kubuntu.conf
+# 1. Configura o arquivo oficial do Kubuntu para ir pro DESKTOP agora
+sed -i 's/Session=.*/Session=plasma/' /etc/sddm.conf.d/20-kubuntu.conf
 sed -i 's/User=.*/User=ztge/' /etc/sddm.conf.d/20-kubuntu.conf
-# Ativa o Relogin para forçar o SDDM a ignorar o medo de crash
 sed -i 's/Relogin=.*/Relogin=true/' /etc/sddm.conf.d/20-kubuntu.conf
 sync
 
-# 2. O NOVO PULO DO GATO: O processo fantasma prepara o terreno para a volta
+# 2. O PULO DO GATO INVERTIDO: O processo fantasma prepara a volta pro jogo
 (
-    # Espera você entrar no jogo tranquilamente
+    # Espera o SDDM te logar no Desktop Plasma tranquilamente
     sleep 3
     
-    # Devolve o arquivo para o Desktop
-    sed -i 's/Session=.*/Session=plasma/' /etc/sddm.conf.d/20-kubuntu.conf
+    # Devolve o arquivo para o Modo Jogo (para o próximo boot/logout)
+    sed -i 's/Session=.*/Session=steam-gamescope/' /etc/sddm.conf.d/20-kubuntu.conf
     sed -i 's/User=.*/User=ztge/' /etc/sddm.conf.d/20-kubuntu.conf
     sed -i 's/Relogin=.*/Relogin=true/' /etc/sddm.conf.d/20-kubuntu.conf
     sync
 ) &
 
-# 3. Mata o SDDM para iniciar o jogo agora
+# 3. Reinicia o SDDM para sair do jogo e entrar no Desktop
 systemctl restart sddm
