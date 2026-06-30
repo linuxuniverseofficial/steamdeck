@@ -12,7 +12,7 @@ echo "[$(date)] Iniciando sessão gamescope" > "$LOG"
 
 # 1. Sobe o gamescope
 env STEAM_MULTIPLE_XWAYLANDS=1 gamescope \
-    -W 1280 -H 800 -r 60 -f -e --xwayland-count 2 \
+    -W 1280 -H 800 -r 60 -f -e --xwayland-count 2 --mangoapp \
     -- steam -gamepadui -steamdeck -steamos3 >> "$LOG" 2>&1 &
 GAMESCOPE_PID=$!
 
