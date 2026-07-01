@@ -1,4 +1,7 @@
 
+# Evitar em PC generico, se o fizer, remova os parametros -steamos3 e -steamdeck, use apenas o -gamepadui que habilita o Big Picture.
+ # Sair de volta pro Desktop não funciona. Requer reboot.
+
 sudo apt install gamescope mangoapp mangohud -y
 
 curl -sSL https://raw.githubusercontent.com/linuxuniverseofficial/steamdeck/refs/heads/main/CustomOS/Kubuntu%2026.04/steamos-session-select | sudo tee /usr/bin/steamos-session-select; sudo chmod +x /usr/bin/steamos-session-select
