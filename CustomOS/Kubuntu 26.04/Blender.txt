@@ -6,3 +6,26 @@ sudo usermod -a -G video $USER
 echo 'ADD_EXTRA_GROUPS=1' | sudo tee -a /etc/adduser.conf
 echo 'EXTRA_GROUPS=video' | sudo tee -a /etc/adduser.conf
 echo 'EXTRA_GROUPS=render' | sudo tee -a /etc/adduser.conf
+
+sudo apt update
+sudo apt install build-essential
+sudo apt install libnuma-dev wget gnupg2
+
+wget https://repo.radeon.com/amdgpu-install/latest/ubuntu/noble/... open browser and get the link!
+https://repo.radeon.com/amdgpu-install/latest/ubuntu/noble/amdgpu-install_7.2.4.70204-1_all.deb
+
+sudo apt install ./amdgpu-install TAB
+IGNORE ERRORS!
+sudo apt update
+
+sudo amdgpu-install --usecase=rocm,hip --no-dkms
+If any error, fix it, like that one:
+sudo apt install rocminfo:amd64=1.0.0.70204-93~24.04
+Try again:
+sudo amdgpu-install --usecase=rocm,hip --no-dkms
+
+export PATH=$PATH:/opt/rocm/bin:/opt/rocm/rocprofiler/bin:/opt/rocm/opencl/bin
+
+sudo apt install rocm
+
+
