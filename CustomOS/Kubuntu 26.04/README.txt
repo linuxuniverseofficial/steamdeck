@@ -3,7 +3,7 @@
  # Sair de volta pro Desktop não funciona. Requer reboot.
 
 # BIOS DO STEAMDECK
- # Mudar a UMA para 1 Gb!
+ # Mudar a UMA para 256 Mb!
  # Deixe o OS gerenciar e alocar a VRAM dinamicamente.
 
 sudo apt install gamescope mangoapp mangohud -y
