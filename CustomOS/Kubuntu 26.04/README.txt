@@ -59,7 +59,14 @@ echo 'KERNEL=="cpu_dma_latency", PROTECTION="0666"' | sudo tee /etc/udev/rules.d
 sudo udevadm control --reload-rules && sudo udevadm trigger
 
 sudo nano /etc/default/grub
-mitigations=off
+GRUB_DEFAULT=0
+GRUB_TIMEOUT_STYLE=hidden
+GRUB_TIMEOUT=1
+GRUB_DISTRIBUTOR='Kubuntu'
+GRUB_CMDLINE_LINUX_DEFAULT='mitigations=off'
+GRUB_CMDLINE_LINUX=""
+GRUB_RECORDFAIL_TIMEOUT=1
+
 sudo update-grub2
 
 sudo usermod -a -G video,render,input,disk $USER
