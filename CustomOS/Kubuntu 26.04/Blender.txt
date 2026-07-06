@@ -1,18 +1,14 @@
 
 # Blender
 
-sudo apt install rocm
-
-Thats it.
-Se tiver problemas, force:
-
 sudo rm -f /etc/apt/sources.list.d/amdgpu*.list
 sudo rm -f /etc/apt/sources.list.d/rocm*.list
 
 sudo amdgpu-install --uninstall
 
+sudo apt purge rocm -y
+sudo apt autoremove --purge -y
 sudo apt update --fix-missing
 sudo apt install -f
-sudo apt autoremove --purge
 
-sudo apt autoremove --purge -y
+sudo apt install rocm
