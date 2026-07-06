@@ -7,10 +7,14 @@ sudo apt update
 # Dependencias quebradas?
 sudo apt install rocminfo:amd64=1.0.0.70204-93~24.04
 sudo amdgpu-install -y
+sudo amdgpu-install --usecase=rocm,hip --no-dkms -y
 Na hora de tentar aplicar o dkms ele quebra. Previsto. Espere concluir.
 Erros foram encontrados durante o processamento de:
  amdgpu-dkms
 E: Sub-process /usr/bin/dpkg returned an error code (1)
+
+sudo ln -s /usr/lib/x86_64-linux-gnu/libxml2.so.2 /opt/rocm-7.2.4/lib/llvm/bin/libxml2.so.2
+sudo ln -s /usr/lib/x86_64-linux-gnu/libxml2.so.2 /opt/rocm-7.2.4/lib/llvm/lib/libxml2.so.2
 
 Tenta rodar o Blender: Select HIP and test Render Cycles changing to GPU Compute
 
@@ -22,6 +26,7 @@ sudo rm -f /etc/apt/sources.list.d/amdgpu*.list
 sudo rm -f /etc/apt/sources.list.d/rocm*.list
 
 sudo amdgpu-install --uninstall
+sudo apt purge amdgpu-install
 
 sudo apt autoremove --purge -y
 sudo apt update --fix-missing
