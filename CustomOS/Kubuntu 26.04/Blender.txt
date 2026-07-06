@@ -29,4 +29,5 @@ sudo apt install -f
 sudo apt purge rocm -y
 
 sudo apt install rocm
+Configurando rocm (7.1.0-0ubuntu6) ...
 # Daqui em diante ele vai puxar uns pacotes pesados pra caramba.
