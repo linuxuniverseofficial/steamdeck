@@ -1,17 +1,15 @@
 
 # Blender (Até esta presente data de 06/07/26 precisa de módulos e pacotes do Kubuntu 24.04)
+ # Até a presente data, usar o amdgpu-instal 7.2.4
+ # ROCm nativo do repositório é o 7.1.1 e é simplesmente quebrado. Pelo menos o 7.2.4 ainda reconhece parcialmente o driver de vídeo.
 
 wget https://repo.radeon.com/amdgpu-install/latest/ubuntu/noble/amdgpu-install_7.2.4.70204-1_all.deb
 sudo apt install ./amdgpu-install_7.2.4.70204-1_all.deb
 sudo apt update
+
 # Dependencias quebradas?
 sudo apt install rocminfo:amd64=1.0.0.70204-93~24.04
-sudo amdgpu-install -y
 sudo amdgpu-install --usecase=rocm,hip --no-dkms -y
-Na hora de tentar aplicar o dkms ele quebra. Previsto. Espere concluir.
-Erros foram encontrados durante o processamento de:
- amdgpu-dkms
-E: Sub-process /usr/bin/dpkg returned an error code (1)
 
 sudo ln -s /usr/lib/x86_64-linux-gnu/libxml2.so.2 /opt/rocm-7.2.4/lib/llvm/bin/libxml2.so.2
 sudo ln -s /usr/lib/x86_64-linux-gnu/libxml2.so.2 /opt/rocm-7.2.4/lib/llvm/lib/libxml2.so.2
