@@ -96,3 +96,5 @@ SUBSYSTEM=="backlight", KERNEL=="amdgpu_bl1", ACTION=="add", RUN+="/bin/chgrp vi
 EOF
 
 sudo udevadm control --reload-rules; sudo udevadm trigger --subsystem-match=backlight
+sudo rm /etc/sddm.conf
+reboot
