@@ -1,7 +1,7 @@
 
 # Blender (Até esta presente data de 06/07/26 precisa de módulos e pacotes do Kubuntu 24.04)
  # Até a presente data, usar o amdgpu-instal 7.2.4
- # ROCm nativo do repositório é o 7.1.1 e é simplesmente quebrado. Pelo menos o 7.2.4 ainda reconhece parcialmente o driver de vídeo.
+ # ROCm nativo do repositório 7.1.1 é simplesmente quebrado.
 
 wget https://repo.radeon.com/amdgpu-install/latest/ubuntu/noble/amdgpu-install_7.2.4.70204-1_all.deb
 sudo apt install ./amdgpu-install_7.2.4.70204-1_all.deb
@@ -11,26 +11,14 @@ sudo apt update
 sudo apt install rocminfo:amd64=1.0.0.70204-93~24.04
 sudo amdgpu-install --usecase=rocm,hip --no-dkms -y
 
-sudo ln -s /usr/lib/x86_64-linux-gnu/libxml2.so.2 /opt/rocm-7.2.4/lib/llvm/bin/libxml2.so.2
-sudo ln -s /usr/lib/x86_64-linux-gnu/libxml2.so.2 /opt/rocm-7.2.4/lib/llvm/lib/libxml2.so.2
+# Baixa um libxml2 antigo (soname .so.2) do repositório Ubuntu
+wget https://launchpad.net/ubuntu/+archive/primary/+files/libxml2_2.12.7+dfsg+really2.9.14-0.4ubuntu0.4_amd64.deb
 
-Tenta rodar o Blender: Select HIP and test Render Cycles changing to GPU Compute
+# Extrai só a .so do pacote
+sudo dpkg --fsys-tarfile libxml2_2.12.7+dfsg+really2.9.14-0.4ubuntu0.4_amd64.deb | tar -xO ./usr/lib/x86_64-linux-gnu/libxml2.so.2.9.14 | sudo tee /lib/x86_64-linux-gnu/libxml2.so.2.9.14 > /dev/null
 
-Blender Crash ou HIP não reconhecido?
+# Cria o symlink apontando pro arquivo real
+sudo ln -sf /lib/x86_64-linux-gnu/libxml2.so.2.9.14 /lib/x86_64-linux-gnu/libxml2.so.2
 
-Hora de reverter (muita lib será revertida parcialmente e tá tudo certo).
-
-sudo rm -f /etc/apt/sources.list.d/amdgpu*.list
-sudo rm -f /etc/apt/sources.list.d/rocm*.list
-
-sudo amdgpu-install --uninstall
-sudo apt purge amdgpu-install
-
-sudo apt autoremove --purge -y
-sudo apt update --fix-missing
-sudo apt install -f
-sudo apt purge rocm -y
-
-sudo apt install rocm
-Configurando rocm (7.1.0-0ubuntu6) ...
-# Daqui em diante ele vai puxar uns pacotes pesados pra caramba.
+# Atualiza o cache do linker
+sudo ldconfig
