@@ -1,14 +1,32 @@
 
-# Blender
+# Blender (Até esta presente data de 06/07/26 precisa de módulos e pacotes do Kubuntu 24.04)
+
+wget https://repo.radeon.com/amdgpu-install/latest/ubuntu/noble/amdgpu-install_7.2.4.70204-1_all.deb
+sudo apt install ./amdgpu-install_7.2.4.70204-1_all.deb
+sudo apt update
+# Dependencias quebradas?
+sudo apt install rocminfo:amd64=1.0.0.70204-93~24.04
+sudo amdgpu-install -y
+Na hora de tentar aplicar o dkms ele quebra. Previsto. Espere concluir.
+Erros foram encontrados durante o processamento de:
+ amdgpu-dkms
+E: Sub-process /usr/bin/dpkg returned an error code (1)
+
+Tenta rodar o Blender: Select HIP and test Render Cycles changing to GPU Compute
+
+Blender Crash ou HIP não reconhecido?
+
+Hora de reverter (muita lib será revertida parcialmente e tá tudo certo).
 
 sudo rm -f /etc/apt/sources.list.d/amdgpu*.list
 sudo rm -f /etc/apt/sources.list.d/rocm*.list
 
 sudo amdgpu-install --uninstall
 
-sudo apt purge rocm -y
 sudo apt autoremove --purge -y
 sudo apt update --fix-missing
 sudo apt install -f
+sudo apt purge rocm -y
 
 sudo apt install rocm
+# Daqui em diante ele vai puxar uns pacotes pesados pra caramba.
