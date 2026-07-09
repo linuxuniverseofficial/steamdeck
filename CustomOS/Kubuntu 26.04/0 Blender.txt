@@ -22,3 +22,7 @@ sudo ln -sf /lib/x86_64-linux-gnu/libxml2.so.2.9.14 /lib/x86_64-linux-gnu/libxml
 
 # Atualiza o cache do linker
 sudo ldconfig
+
+
+Keep 125% of Desktop Scale
+Set Blender as FULL SCREEN when using
